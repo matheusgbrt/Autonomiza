@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<Tarefa> Tarefas => Set<Tarefa>();
     public DbSet<Meta> Metas => Set<Meta>();
     public DbSet<InsightIA> InsightsIA => Set<InsightIA>();
+    public DbSet<RecomendacaoIA> RecomendacoesIA => Set<RecomendacaoIA>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

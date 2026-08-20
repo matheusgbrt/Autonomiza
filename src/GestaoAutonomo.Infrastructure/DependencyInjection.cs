@@ -33,6 +33,7 @@ public static class DependencyInjection
         services.AddScoped<ITarefaRepository, TarefaRepository>();
         services.AddScoped<IMetaRepository, MetaRepository>();
         services.AddScoped<IInsightRepository, InsightRepository>();
+        services.AddScoped<IRecomendacaoRepository, RecomendacaoRepository>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 

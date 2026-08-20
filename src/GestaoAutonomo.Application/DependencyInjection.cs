@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<IMetaService, MetaService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IAiConsultorService, AiConsultorService>();
+        services.AddScoped<IRecomendacaoService, RecomendacaoService>();
         services.AddScoped<IIntegracaoWhatsAppService, IntegracaoWhatsAppService>();
         services.AddScoped<IWhatsAppWebhookProcessor, WhatsAppWebhookProcessor>();
         services.AddScoped<ILembreteAgendamentoService, LembreteAgendamentoService>();
