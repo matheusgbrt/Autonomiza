@@ -7,6 +7,8 @@ public record MetaDto(
     TipoMeta Tipo,
     string Titulo,
     decimal ValorAlvo,
+    decimal ValorAtual,
+    decimal ProgressoPercentual,
     DateTime PeriodoInicio,
     DateTime PeriodoFim,
     DateTime CreatedAt);
