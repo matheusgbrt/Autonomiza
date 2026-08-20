@@ -1,6 +1,8 @@
 using System.Text;
 using GestaoAutonomo.Application.Interfaces;
 using GestaoAutonomo.Domain.Enums;
+using GestaoAutonomo.Infrastructure.Integrations;
+using GestaoAutonomo.Infrastructure.Jobs;
 using GestaoAutonomo.Infrastructure.Persistence;
 using GestaoAutonomo.Infrastructure.Persistence.Repositories;
 using GestaoAutonomo.Infrastructure.Security;
@@ -25,8 +27,19 @@ public static class DependencyInjection
 
         services.AddScoped<IClienteRepository, ClienteRepository>();
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+        services.AddScoped<IServicoRepository, ServicoRepository>();
+        services.AddScoped<IAgendamentoRepository, AgendamentoRepository>();
+        services.AddScoped<ILancamentoFinanceiroRepository, LancamentoFinanceiroRepository>();
+        services.AddScoped<ITarefaRepository, TarefaRepository>();
+        services.AddScoped<IMetaRepository, MetaRepository>();
+        services.AddScoped<IInsightRepository, InsightRepository>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+
+        services.AddHttpClient<IWhatsAppSender, ZApiWhatsAppSender>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.z-api.io/");
+        });
 
         var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>() ?? new JwtSettings();
 
@@ -47,6 +60,9 @@ public static class DependencyInjection
 
         services.AddAuthorizationBuilder()
             .AddPolicy(PremiumOnlyPolicy, policy => policy.RequireClaim("plano", nameof(Plano.Pro)));
+
+        services.AddHostedService<LembreteAgendamentoJob>();
+        services.AddHostedService<InsightsRefreshJob>();
 
         return services;
     }
