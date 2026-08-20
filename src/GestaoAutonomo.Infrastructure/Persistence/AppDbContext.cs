@@ -15,6 +15,7 @@ public class AppDbContext : DbContext
     public DbSet<Agendamento> Agendamentos => Set<Agendamento>();
     public DbSet<LancamentoFinanceiro> LancamentosFinanceiros => Set<LancamentoFinanceiro>();
     public DbSet<Tarefa> Tarefas => Set<Tarefa>();
+    public DbSet<ItemChecklist> ItensChecklist => Set<ItemChecklist>();
     public DbSet<Meta> Metas => Set<Meta>();
     public DbSet<InsightIA> InsightsIA => Set<InsightIA>();
     public DbSet<RecomendacaoIA> RecomendacoesIA => Set<RecomendacaoIA>();

@@ -15,15 +15,21 @@ public class TarefaController : ControllerBase
     private readonly ITarefaService _tarefaService;
     private readonly IValidator<CriarTarefaDto> _criarValidator;
     private readonly IValidator<AtualizarTarefaDto> _atualizarValidator;
+    private readonly IValidator<CriarItemChecklistDto> _criarItemValidator;
+    private readonly IValidator<AtualizarItemChecklistDto> _atualizarItemValidator;
 
     public TarefaController(
         ITarefaService tarefaService,
         IValidator<CriarTarefaDto> criarValidator,
-        IValidator<AtualizarTarefaDto> atualizarValidator)
+        IValidator<AtualizarTarefaDto> atualizarValidator,
+        IValidator<CriarItemChecklistDto> criarItemValidator,
+        IValidator<AtualizarItemChecklistDto> atualizarItemValidator)
     {
         _tarefaService = tarefaService;
         _criarValidator = criarValidator;
         _atualizarValidator = atualizarValidator;
+        _criarItemValidator = criarItemValidator;
+        _atualizarItemValidator = atualizarItemValidator;
     }
 
     [HttpGet]
@@ -80,6 +86,47 @@ public class TarefaController : ControllerBase
     public async Task<IActionResult> Remover(Guid id, CancellationToken ct)
     {
         await _tarefaService.RemoverAsync(User.GetUsuarioId(), id, ct);
+        return NoContent();
+    }
+
+    [HttpPost("{tarefaId:guid}/itens")]
+    [ProducesResponseType(typeof(ItemChecklistDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ItemChecklistDto>> AdicionarItem(Guid tarefaId, CriarItemChecklistDto dto, CancellationToken ct)
+    {
+        var validacao = await _criarItemValidator.ValidateAsync(dto, ct);
+        if (!validacao.IsValid)
+        {
+            return ValidationProblem(validacao.ToModelState());
+        }
+
+        var item = await _tarefaService.AdicionarItemAsync(User.GetUsuarioId(), tarefaId, dto, ct);
+        return CreatedAtAction(nameof(ObterPorId), new { id = tarefaId }, item);
+    }
+
+    [HttpPut("{tarefaId:guid}/itens/{itemId:guid}")]
+    [ProducesResponseType(typeof(ItemChecklistDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ItemChecklistDto>> AtualizarItem(Guid tarefaId, Guid itemId, AtualizarItemChecklistDto dto, CancellationToken ct)
+    {
+        var validacao = await _atualizarItemValidator.ValidateAsync(dto, ct);
+        if (!validacao.IsValid)
+        {
+            return ValidationProblem(validacao.ToModelState());
+        }
+
+        var item = await _tarefaService.AtualizarItemAsync(User.GetUsuarioId(), tarefaId, itemId, dto, ct);
+        return Ok(item);
+    }
+
+    [HttpDelete("{tarefaId:guid}/itens/{itemId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RemoverItem(Guid tarefaId, Guid itemId, CancellationToken ct)
+    {
+        await _tarefaService.RemoverItemAsync(User.GetUsuarioId(), tarefaId, itemId, ct);
         return NoContent();
     }
 }

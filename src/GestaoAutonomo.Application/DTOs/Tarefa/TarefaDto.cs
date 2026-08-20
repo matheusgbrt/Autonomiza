@@ -6,4 +6,5 @@ public record TarefaDto(
     string? Descricao,
     bool Concluida,
     DateTime? DataVencimento,
+    IReadOnlyList<ItemChecklistDto> Itens,
     DateTime CreatedAt);

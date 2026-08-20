@@ -31,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<IAgendamentoRepository, AgendamentoRepository>();
         services.AddScoped<ILancamentoFinanceiroRepository, LancamentoFinanceiroRepository>();
         services.AddScoped<ITarefaRepository, TarefaRepository>();
+        services.AddScoped<IItemChecklistRepository, ItemChecklistRepository>();
         services.AddScoped<IMetaRepository, MetaRepository>();
         services.AddScoped<IInsightRepository, InsightRepository>();
         services.AddScoped<IRecomendacaoRepository, RecomendacaoRepository>();

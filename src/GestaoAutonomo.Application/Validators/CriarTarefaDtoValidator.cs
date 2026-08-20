@@ -9,5 +9,6 @@ public class CriarTarefaDtoValidator : AbstractValidator<CriarTarefaDto>
     {
         RuleFor(x => x.Titulo).NotEmpty().MaximumLength(200);
         RuleFor(x => x.Descricao).MaximumLength(2000);
+        RuleForEach(x => x.ItensIniciais).NotEmpty().MaximumLength(500);
     }
 }
