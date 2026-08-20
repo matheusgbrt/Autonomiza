@@ -2,6 +2,7 @@ using GestaoAutonomo.Application.DTOs.LancamentoFinanceiro;
 using GestaoAutonomo.Application.Exceptions;
 using GestaoAutonomo.Application.Interfaces;
 using GestaoAutonomo.Domain.Entities;
+using GestaoAutonomo.Domain.Enums;
 
 namespace GestaoAutonomo.Application.Services;
 
@@ -53,6 +54,28 @@ public class LancamentoFinanceiroService : ILancamentoFinanceiroService
     {
         var lancamentos = await _lancamentoRepository.ListarAsync(usuarioId, ct);
         return lancamentos.Select(ParaDto).ToList();
+    }
+
+    public async Task<SaldoMensalDto> ObterSaldoMensalAsync(Guid usuarioId, int ano, int mes, CancellationToken ct)
+    {
+        var inicio = new DateTime(ano, mes, 1, 0, 0, 0, DateTimeKind.Utc);
+        var fimExclusivo = inicio.AddMonths(1);
+
+        var lancamentos = await _lancamentoRepository.ListarEntrePeriodoAsync(usuarioId, inicio, fimExclusivo, ct);
+
+        var totalEntradas = lancamentos.Where(l => l.Tipo == TipoLancamento.Entrada).Sum(l => l.Valor);
+        var totalSaidas = lancamentos.Where(l => l.Tipo == TipoLancamento.Saida).Sum(l => l.Valor);
+
+        var porCategoria = lancamentos
+            .GroupBy(l => l.Categoria)
+            .Select(g => new SaldoCategoriaDto(
+                g.Key,
+                g.Where(l => l.Tipo == TipoLancamento.Entrada).Sum(l => l.Valor),
+                g.Where(l => l.Tipo == TipoLancamento.Saida).Sum(l => l.Valor)))
+            .OrderByDescending(c => c.TotalEntradas)
+            .ToList();
+
+        return new SaldoMensalDto(ano, mes, totalEntradas, totalSaidas, totalEntradas - totalSaidas, porCategoria);
     }
 
     public async Task<LancamentoFinanceiroDto> AtualizarAsync(Guid usuarioId, Guid id, AtualizarLancamentoFinanceiroDto dto, CancellationToken ct)

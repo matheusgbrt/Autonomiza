@@ -34,6 +34,15 @@ public class LancamentoFinanceiroController : ControllerBase
         return Ok(lancamentos);
     }
 
+    [HttpGet("saldo")]
+    [ProducesResponseType(typeof(SaldoMensalDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<SaldoMensalDto>> ObterSaldoMensal([FromQuery] int? ano, [FromQuery] int? mes, CancellationToken ct)
+    {
+        var agora = DateTime.UtcNow;
+        var saldo = await _lancamentoService.ObterSaldoMensalAsync(User.GetUsuarioId(), ano ?? agora.Year, mes ?? agora.Month, ct);
+        return Ok(saldo);
+    }
+
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(LancamentoFinanceiroDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
