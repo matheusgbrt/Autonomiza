@@ -6,6 +6,12 @@
       "runtimeExecutable": "dotnet",
       "runtimeArgs": ["run", "--project", "src/GestaoAutonomo.API", "--launch-profile", "http"],
       "port": 5152
+    },
+    {
+      "name": "GestaoAutonomo.Frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "frontend"],
+      "port": 5173
     }
   ]
 }
