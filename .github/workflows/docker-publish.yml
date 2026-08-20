@@ -65,7 +65,7 @@ jobs:
           # Vite embute isso no bundle em build-time — precisa ser a URL pública da API
           # que o navegador do usuário final vai chamar (mesma lógica do docker-compose.yml).
           build-args: |
-            VITE_API_URL=${{ vars.VITE_API_URL || 'https://api.controleautonomo.gtlabs.com.br' }}
+            VITE_API_URL=${{ vars.VITE_API_URL || 'https://api.autonomiza.gtlabs.com.br' }}
           tags: |
             matheusgbrt/gestao-autonomo-frontend:latest
             matheusgbrt/gestao-autonomo-frontend:${{ github.sha }}
