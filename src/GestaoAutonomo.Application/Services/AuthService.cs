@@ -2,6 +2,7 @@ using GestaoAutonomo.Application.DTOs.Auth;
 using GestaoAutonomo.Application.Exceptions;
 using GestaoAutonomo.Application.Interfaces;
 using GestaoAutonomo.Domain.Entities;
+using GestaoAutonomo.Domain.Enums;
 
 namespace GestaoAutonomo.Application.Services;
 
@@ -51,6 +52,17 @@ public class AuthService : IAuthService
         {
             throw new CredenciaisInvalidasException();
         }
+
+        return GerarResposta(usuario);
+    }
+
+    public async Task<AuthResponseDto> SimularPlanoAsync(Guid usuarioId, SimularPlanoDto dto, CancellationToken ct)
+    {
+        var usuario = await _usuarioRepository.ObterPorIdAsync(usuarioId, ct)
+            ?? throw new RecursoNaoEncontradoException("Usuário não encontrado.");
+
+        usuario.Plano = dto.Plano;
+        await _usuarioRepository.SalvarAlteracoesAsync(ct);
 
         return GerarResposta(usuario);
     }

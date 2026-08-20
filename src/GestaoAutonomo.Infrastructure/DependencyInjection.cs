@@ -17,6 +17,7 @@ namespace GestaoAutonomo.Infrastructure;
 public static class DependencyInjection
 {
     public const string PremiumOnlyPolicy = "PremiumOnly";
+    public const string FrontendCorsPolicy = "Frontend";
 
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
@@ -24,6 +25,17 @@ public static class DependencyInjection
             options.UseNpgsql(configuration.GetConnectionString("Default")));
 
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+
+        var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+            ?? new[] { "http://localhost:5173" };
+
+        services.AddCors(options =>
+        {
+            options.AddPolicy(FrontendCorsPolicy, policy =>
+                policy.WithOrigins(allowedOrigins)
+                      .AllowAnyHeader()
+                      .AllowAnyMethod());
+        });
 
         services.AddScoped<IClienteRepository, ClienteRepository>();
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();

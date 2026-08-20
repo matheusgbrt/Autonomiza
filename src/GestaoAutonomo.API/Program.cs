@@ -51,6 +51,8 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
+app.UseCors(GestaoAutonomo.Infrastructure.DependencyInjection.FrontendCorsPolicy);
+
 app.UseAuthentication();
 app.UseAuthorization();
 

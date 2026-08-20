@@ -6,4 +6,5 @@ public interface IAuthService
 {
     Task<AuthResponseDto> RegistrarAsync(RegistrarUsuarioDto dto, CancellationToken ct);
     Task<AuthResponseDto> LoginAsync(LoginDto dto, CancellationToken ct);
+    Task<AuthResponseDto> SimularPlanoAsync(Guid usuarioId, SimularPlanoDto dto, CancellationToken ct);
 }
