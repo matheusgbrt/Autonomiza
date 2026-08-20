@@ -34,7 +34,7 @@ services:
       # Origem do frontend que pode chamar a API via browser (CORS). Um proxy reverso
       # externo é quem expõe isso publicamente em api.gtlabs.com.br; a API só precisa
       # saber de onde aceitar requisições cross-origin.
-      Cors__AllowedOrigins__0: ${FRONTEND_ORIGIN:-https://app.gtlabs.com.br}
+      Cors__AllowedOrigins__0: ${FRONTEND_ORIGIN:-https://controleautonomo.gtlabs.com.br}
     ports:
       # Publicado para o proxy reverso externo alcançar via localhost:8080.
       - "8080:8080"
@@ -46,7 +46,7 @@ services:
       args:
         # Vite embute isso no bundle em build-time — precisa ser a URL pública da API
         # (a que o navegador do usuário final vai chamar), não um nome de serviço interno.
-        VITE_API_URL: ${API_ORIGIN:-https://api.gtlabs.com.br}
+        VITE_API_URL: ${API_ORIGIN:-https://api.controleautonomo.gtlabs.com.br}
     restart: unless-stopped
     ports:
       # Publicado para o proxy reverso externo alcançar via localhost:8081.
