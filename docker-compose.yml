@@ -31,12 +31,10 @@ services:
       Jwt__Audience: gestao-autonomo-clients
       Jwt__Key: ${JWT_KEY:?Set JWT_KEY in your .env file to a long random secret}
       Jwt__ExpiresMinutes: "120"
-      # Origem do frontend que pode chamar a API via browser (CORS). Um proxy reverso
-      # externo é quem expõe isso publicamente em api.gtlabs.com.br; a API só precisa
-      # saber de onde aceitar requisições cross-origin.
-      Cors__AllowedOrigins__0: ${FRONTEND_ORIGIN:-https://controleautonomo.gtlabs.com.br}
+      # Origem do frontend que pode chamar a API via browser (CORS) neste ambiente
+      # de dev local. Para deploy real, ver deploy/docker-compose.yml.
+      Cors__AllowedOrigins__0: ${FRONTEND_ORIGIN:-http://localhost:8081}
     ports:
-      # Publicado para o proxy reverso externo alcançar via localhost:8080.
       - "8080:8080"
 
   frontend:
@@ -44,12 +42,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        # Vite embute isso no bundle em build-time — precisa ser a URL pública da API
-        # (a que o navegador do usuário final vai chamar), não um nome de serviço interno.
-        VITE_API_URL: ${API_ORIGIN:-https://api.controleautonomo.gtlabs.com.br}
+        # Vite embute isso no bundle em build-time — precisa ser a URL pela qual o
+        # navegador vai alcançar a API (aqui, a própria porta publicada abaixo).
+        VITE_API_URL: ${API_ORIGIN:-http://localhost:8080}
     restart: unless-stopped
     ports:
-      # Publicado para o proxy reverso externo alcançar via localhost:8081.
       - "8081:80"
 
 volumes:
