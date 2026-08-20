@@ -1,0 +1,60 @@
+# Stack de produção para deploy via Portainer (portainer-internal.home).
+# Diferente do docker-compose.yml da raiz (que builda as imagens localmente para
+# dev), este arquivo só puxa as imagens já publicadas no Docker Hub pelo pipeline
+# de CI (.github/workflows/docker-publish.yml).
+#
+# Variáveis obrigatórias (definir em Portainer > Stack > Environment variables,
+# ou via .env ao lado deste arquivo — veja .env.example):
+#   POSTGRES_PASSWORD
+#   JWT_KEY
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gestao_autonomo
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    image: matheusgbrt/gestao-autonomo-api:latest
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: Host=postgres;Port=5432;Database=gestao_autonomo;Username=postgres;Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      Jwt__Issuer: gestao-autonomo
+      Jwt__Audience: gestao-autonomo-clients
+      Jwt__Key: ${JWT_KEY:?Set JWT_KEY to a long random secret}
+      Jwt__ExpiresMinutes: "120"
+      # Domínios que podem chamar a API via browser (CORS). O Caddy em proxy.home
+      # é quem expõe isso publicamente (ver deploy/Caddyfile); a API só precisa
+      # saber de onde aceitar requisições cross-origin.
+      Cors__AllowedOrigins__0: https://autonomiza.gtlabs.com.br
+      Cors__AllowedOrigins__1: https://controleautonomo.gtlabs.com.br
+    ports:
+      # Publicado no host do Portainer para o Caddy em proxy.home alcançar via
+      # portainer-internal.home:18080 (ver deploy/Caddyfile).
+      - "18080:8080"
+
+  frontend:
+    image: matheusgbrt/gestao-autonomo-frontend:latest
+    restart: unless-stopped
+    ports:
+      # Publicado no host do Portainer para o Caddy em proxy.home alcançar via
+      # portainer-internal.home:18081 (ver deploy/Caddyfile). A URL da API já
+      # está embutida no bundle (VITE_API_URL foi setado em build-time pelo CI).
+      - "18081:80"
+
+volumes:
+  postgres_data:

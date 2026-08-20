@@ -1,0 +1,31 @@
+# Adicionar isso ao Caddyfile de proxy.home (ainda não existe um — se este for
+# o primeiro site, pode ser o Caddyfile inteiro; se já existir outros blocos,
+# só acrescente estes blocos).
+#
+# autonomiza.gtlabs.com.br é o domínio atual da marca (Autonomiza); os blocos
+# controleautonomo.* ficam mantidos para não quebrar quem ainda aponta pro
+# domínio antigo (mesmo host:porta por trás, então tanto faz qual usar).
+#
+# Assume que:
+#   - Os quatro domínios abaixo resolvem (DNS público ou split-horizon) para o
+#     endereço onde proxy.home recebe tráfego nas portas 80/443, para o ACME
+#     (Let's Encrypt) funcionar.
+#   - proxy.home consegue alcançar portainer-internal.home na rede interna.
+# Se algum desses pontos não bater com o seu ambiente, ajuste os hosts/portas
+# abaixo ou troca por DNS challenge se 80/443 não forem alcançáveis externamente.
+
+autonomiza.gtlabs.com.br {
+    reverse_proxy portainer-internal.home:18081
+}
+
+api.autonomiza.gtlabs.com.br {
+    reverse_proxy portainer-internal.home:18080
+}
+
+controleautonomo.gtlabs.com.br {
+    reverse_proxy portainer-internal.home:18081
+}
+
+api.controleautonomo.gtlabs.com.br {
+    reverse_proxy portainer-internal.home:18080
+}
