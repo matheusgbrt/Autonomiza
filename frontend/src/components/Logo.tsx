@@ -12,8 +12,8 @@ export function LogoMark({ size = 32, className = '' }: { size?: number; classNa
     >
       <defs>
         <linearGradient id="autonomiza-logo-grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#6366f1" />
-          <stop offset="1" stopColor="#4338ca" />
+          <stop stopColor="#22d3ee" />
+          <stop offset="1" stopColor="#8b5cf6" />
         </linearGradient>
       </defs>
       <rect x="1" y="1" width="38" height="38" rx="10" fill="url(#autonomiza-logo-grad)" />
@@ -28,7 +28,7 @@ export function Logo({ size = 32, className = '' }: { size?: number; className?:
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <LogoMark size={size} />
-      <span className="text-lg font-bold text-slate-900">Autonomiza</span>
+      <span className="text-lg font-bold text-ink">Autonomiza</span>
     </div>
   );
 }

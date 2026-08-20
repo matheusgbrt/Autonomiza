@@ -1,29 +1,29 @@
 import type { HTMLAttributes, TdHTMLAttributes, ThHTMLAttributes } from 'react';
 
-export function Table(props: HTMLAttributes<HTMLTableElement>) {
+export function Table({ className = '', ...props }: HTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-      <table className="w-full min-w-max text-left text-sm" {...props} />
+    <div className="overflow-x-auto rounded-2xl border border-stroke bg-surface">
+      <table className={`w-full min-w-max text-left text-sm ${className}`} {...props} />
     </div>
   );
 }
 
-export function Thead(props: HTMLAttributes<HTMLTableSectionElement>) {
-  return <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500" {...props} />;
+export function Thead({ className = '', ...props }: HTMLAttributes<HTMLTableSectionElement>) {
+  return <thead className={`border-b border-stroke bg-elevated text-xs uppercase tracking-wide text-faint ${className}`} {...props} />;
 }
 
-export function Th(props: ThHTMLAttributes<HTMLTableCellElement>) {
-  return <th className="px-4 py-3 font-semibold" {...props} />;
+export function Th({ className = '', ...props }: ThHTMLAttributes<HTMLTableCellElement>) {
+  return <th className={`px-4 py-3 font-semibold ${className}`} {...props} />;
 }
 
-export function Tbody(props: HTMLAttributes<HTMLTableSectionElement>) {
-  return <tbody className="divide-y divide-slate-100" {...props} />;
+export function Tbody({ className = '', ...props }: HTMLAttributes<HTMLTableSectionElement>) {
+  return <tbody className={`divide-y divide-stroke ${className}`} {...props} />;
 }
 
-export function Tr(props: HTMLAttributes<HTMLTableRowElement>) {
-  return <tr className="hover:bg-slate-50" {...props} />;
+export function Tr({ className = '', ...props }: HTMLAttributes<HTMLTableRowElement>) {
+  return <tr className={`hover:bg-elevated ${className}`} {...props} />;
 }
 
-export function Td(props: TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td className="px-4 py-3 align-middle text-slate-700" {...props} />;
+export function Td({ className = '', ...props }: TdHTMLAttributes<HTMLTableCellElement>) {
+  return <td className={`px-4 py-3 align-middle text-muted ${className}`} {...props} />;
 }

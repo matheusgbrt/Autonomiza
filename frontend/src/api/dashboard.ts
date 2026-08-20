@@ -6,7 +6,7 @@ export async function obterResumo(): Promise<ResumoDashboardDto> {
   return data;
 }
 
-export async function obterAvancado(): Promise<DashboardAvancadoDto> {
-  const { data } = await apiClient.get<DashboardAvancadoDto>('/api/pro/dashboard/avancado');
+export async function obterAvancado(periodo?: { inicio: string; fim: string }): Promise<DashboardAvancadoDto> {
+  const { data } = await apiClient.get<DashboardAvancadoDto>('/api/pro/dashboard/avancado', { params: periodo });
   return data;
 }

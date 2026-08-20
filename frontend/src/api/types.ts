@@ -111,6 +111,7 @@ export interface AgendamentoDto {
   dataHoraFim: string;
   status: StatusAgendamento;
   observacoes: string | null;
+  notaAtendimento: number | null;
   createdAt: string;
 }
 
@@ -127,6 +128,7 @@ export interface AtualizarAgendamentoDto {
   dataHoraInicio: string;
   status: StatusAgendamento;
   observacoes?: string | null;
+  notaAtendimento?: number | null;
 }
 
 // ---------- Financeiro ----------
@@ -255,10 +257,19 @@ export interface RentabilidadeServicoDto {
   ticketMedio: number;
 }
 
+export interface PontoTrimestralDto {
+  ano: number;
+  trimestre: number;
+  total: number;
+}
+
 export interface DashboardAvancadoDto {
   rentabilidadePorServico: RentabilidadeServicoDto[];
   taxaFidelizacaoPercentual: number;
   projecaoFaturamentoProximos30Dias: number;
+  healthScoreNegocio: number;
+  satisfacaoMedia: number | null;
+  crescimentoReceitaTrimestral: PontoTrimestralDto[];
 }
 
 // ---------- IA Consultora ----------
@@ -298,6 +309,31 @@ export interface StatusIntegracaoWhatsAppDto {
   conectado: boolean;
   instanceId: string | null;
 }
+
+export interface EstatisticasWhatsAppDto {
+  conversasHoje: number;
+  agendamentosHoje: number;
+  agendamentosMes: number;
+  taxaConversaoPercentual: number;
+}
+
+export interface MensagemWhatsAppDto {
+  clienteNome: string | null;
+  telefone: string;
+  direcao: 'Recebida' | 'Enviada';
+  conteudo: string;
+  criadoEm: string;
+}
+
+export interface ConfiguracaoWhatsAppDto {
+  respostasAutomaticas: boolean;
+  horariosDisponiveis: boolean;
+  confirmarAgendamentos: boolean;
+  lembretesAutomaticos: boolean;
+  mensagemBoasVindas: string | null;
+}
+
+export type AtualizarConfiguracaoWhatsAppDto = ConfiguracaoWhatsAppDto;
 
 // ---------- Erros ----------
 export interface ProblemDetailsDto {

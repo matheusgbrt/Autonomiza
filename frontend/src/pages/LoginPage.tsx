@@ -33,10 +33,10 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-base px-4">
       <Card className="w-full max-w-sm">
         <Logo size={36} className="mb-4" />
-        <p className="mb-6 text-sm text-slate-500">Entre na sua conta</p>
+        <p className="mb-6 text-sm text-faint">Entre na sua conta</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
@@ -54,16 +54,16 @@ export function LoginPage() {
             required
           />
 
-          {erro && <p className="text-sm text-red-600">{erro}</p>}
+          {erro && <p className="text-sm text-rose">{erro}</p>}
 
           <Button type="submit" disabled={carregando} className="w-full">
             {carregando ? 'Entrando…' : 'Entrar'}
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-slate-500">
+        <p className="mt-6 text-center text-sm text-faint">
           Ainda não tem conta?{' '}
-          <Link to="/registrar" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <Link to="/registrar" className="font-medium text-indigo hover:text-indigo/80">
             Criar conta
           </Link>
         </p>

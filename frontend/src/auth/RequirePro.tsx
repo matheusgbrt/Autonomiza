@@ -27,17 +27,17 @@ export function RequirePro({ children }: { children: ReactNode }) {
 
   return (
     <Card className="mx-auto mt-12 max-w-lg text-center">
-      <div className="mb-3 inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-700">
+      <div className="mb-3 inline-block rounded-full bg-violet/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-violet">
         Recurso Pro
       </div>
-      <h2 className="mb-2 text-xl font-semibold text-slate-900">
+      <h2 className="mb-2 text-xl font-semibold text-ink">
         Esse recurso faz parte do Autonomiza Pro IA
       </h2>
-      <p className="mb-6 text-sm text-slate-600">
+      <p className="mb-6 text-sm text-muted">
         Sua conta está no plano gratuito (Autonomiza). Este projeto ainda não tem
         cobrança real — use o botão abaixo só para fins de demonstração.
       </p>
-      {erro && <p className="mb-4 text-sm text-red-600">{erro}</p>}
+      {erro && <p className="mb-4 text-sm text-rose">{erro}</p>}
       <Button onClick={handleSimularUpgrade} disabled={carregando}>
         {carregando ? 'Simulando…' : 'Simular upgrade para Pro'}
       </Button>

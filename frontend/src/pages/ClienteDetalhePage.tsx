@@ -6,6 +6,7 @@ import { Badge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
 import { PageHeader } from '../components/PageHeader';
 import { Table, Thead, Tbody, Tr, Th, Td } from '../components/ui/Table';
+import { formatarTelefone } from '../utils/mask';
 
 const STATUS_LABEL: Record<StatusAgendamento, { label: string; tone: 'slate' | 'green' | 'amber' | 'red' | 'indigo' }> = {
   [StatusAgendamento.Agendado]: { label: 'Agendado', tone: 'slate' },
@@ -31,7 +32,7 @@ export function ClienteDetalhePage() {
 
   return (
     <div>
-      <Link to="/clientes" className="mb-4 inline-block text-sm text-indigo-600 hover:text-indigo-500">
+      <Link to="/clientes" className="mb-4 inline-block text-sm text-indigo hover:text-indigo/80">
         ← Voltar para clientes
       </Link>
 
@@ -40,22 +41,22 @@ export function ClienteDetalhePage() {
       <Card className="mb-6">
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
-            <dt className="text-xs font-medium uppercase text-slate-500">E-mail</dt>
-            <dd className="mt-1 text-sm text-slate-900">{cliente?.email ?? '—'}</dd>
+            <dt className="text-xs font-medium uppercase text-faint">E-mail</dt>
+            <dd className="mt-1 text-sm text-ink">{cliente?.email ?? '—'}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-slate-500">Telefone</dt>
-            <dd className="mt-1 text-sm text-slate-900">{cliente?.telefone ?? '—'}</dd>
+            <dt className="text-xs font-medium uppercase text-faint">Telefone</dt>
+            <dd className="mt-1 text-sm text-ink">{cliente?.telefone ? formatarTelefone(cliente.telefone) : '—'}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-slate-500">Observações</dt>
-            <dd className="mt-1 text-sm text-slate-900">{cliente?.observacoes ?? '—'}</dd>
+            <dt className="text-xs font-medium uppercase text-faint">Observações</dt>
+            <dd className="mt-1 text-sm text-ink">{cliente?.observacoes ?? '—'}</dd>
           </div>
         </dl>
       </Card>
 
       {isLoading ? (
-        <p className="text-sm text-slate-500">Carregando…</p>
+        <p className="text-sm text-faint">Carregando…</p>
       ) : (
         <Table>
           <Thead>
@@ -68,7 +69,7 @@ export function ClienteDetalhePage() {
           <Tbody>
             {historico?.length === 0 && (
               <Tr>
-                <Td colSpan={3} className="text-center text-slate-400">
+                <Td colSpan={3} className="text-center text-faint">
                   Nenhum atendimento registrado ainda.
                 </Td>
               </Tr>
@@ -77,7 +78,7 @@ export function ClienteDetalhePage() {
               const status = STATUS_LABEL[agendamento.status];
               return (
                 <Tr key={agendamento.id}>
-                  <Td className="font-medium text-slate-900">{agendamento.servicoNome}</Td>
+                  <Td className="font-medium text-ink">{agendamento.servicoNome}</Td>
                   <Td>{new Date(agendamento.dataHoraInicio).toLocaleString('pt-BR')}</Td>
                   <Td>
                     <Badge tone={status.tone}>{status.label}</Badge>

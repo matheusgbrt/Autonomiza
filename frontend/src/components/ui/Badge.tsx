@@ -1,11 +1,13 @@
-type Tone = 'slate' | 'green' | 'amber' | 'red' | 'indigo';
+type Tone = 'slate' | 'green' | 'amber' | 'red' | 'indigo' | 'violet' | 'cyan';
 
 const TONE_CLASSES: Record<Tone, string> = {
-  slate: 'bg-slate-100 text-slate-700',
-  green: 'bg-emerald-100 text-emerald-700',
-  amber: 'bg-amber-100 text-amber-700',
-  red: 'bg-red-100 text-red-700',
-  indigo: 'bg-indigo-100 text-indigo-700',
+  slate: 'bg-elevated text-muted',
+  green: 'bg-mint/15 text-mint',
+  amber: 'bg-amber/15 text-amber',
+  red: 'bg-rose/15 text-rose',
+  indigo: 'bg-indigo/15 text-indigo',
+  violet: 'bg-violet/15 text-violet',
+  cyan: 'bg-cyan/15 text-cyan',
 };
 
 export function Badge({ tone = 'slate', children }: { tone?: Tone; children: React.ReactNode }) {

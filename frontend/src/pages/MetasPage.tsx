@@ -5,7 +5,7 @@ import { TipoMeta } from '../api/types';
 import { extractErrorMessage } from '../api/client';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { Input, Select } from '../components/ui/Input';
+import { CurrencyInput, Input, Select } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { PageHeader } from '../components/PageHeader';
 import { ProgressBar } from '../components/ui/ProgressBar';
@@ -88,16 +88,16 @@ export function MetasPage() {
       />
 
       {isLoading ? (
-        <p className="text-sm text-slate-500">Carregando…</p>
+        <p className="text-sm text-faint">Carregando…</p>
       ) : metas?.length === 0 ? (
-        <p className="text-sm text-slate-400">Nenhuma meta cadastrada ainda.</p>
+        <p className="text-sm text-faint">Nenhuma meta cadastrada ainda.</p>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {metas?.map((meta) => (
             <Card key={meta.id}>
               <div className="mb-3 flex items-start justify-between">
                 <div>
-                  <h3 className="font-semibold text-slate-900">{meta.titulo}</h3>
+                  <h3 className="font-semibold text-ink">{meta.titulo}</h3>
                   <Badge tone={meta.tipo === TipoMeta.Faturamento ? 'indigo' : 'slate'}>
                     {meta.tipo === TipoMeta.Faturamento ? 'Faturamento' : 'Atendimentos'}
                   </Badge>
@@ -108,14 +108,14 @@ export function MetasPage() {
               </div>
 
               <div className="mb-2 flex items-baseline justify-between text-sm">
-                <span className="text-slate-500">
+                <span className="text-faint">
                   {formatarValor(meta.tipo, meta.valorAtual)} de {formatarValor(meta.tipo, meta.valorAlvo)}
                 </span>
-                <span className="font-semibold text-slate-900">{meta.progressoPercentual.toFixed(0)}%</span>
+                <span className="font-semibold text-ink">{meta.progressoPercentual.toFixed(0)}%</span>
               </div>
               <ProgressBar percentual={meta.progressoPercentual} />
 
-              <p className="mt-3 text-xs text-slate-400">
+              <p className="mt-3 text-xs text-faint">
                 {new Date(meta.periodoInicio).toLocaleDateString('pt-BR')} até{' '}
                 {new Date(meta.periodoFim).toLocaleDateString('pt-BR')}
               </p>
@@ -132,15 +132,24 @@ export function MetasPage() {
               <option value={TipoMeta.Atendimentos}>Atendimentos</option>
             </Select>
             <Input label="Título" value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} required />
-            <Input
-              label={form.tipo === TipoMeta.Faturamento ? 'Valor alvo (R$)' : 'Quantidade alvo'}
-              type="number"
-              step={form.tipo === TipoMeta.Faturamento ? '0.01' : '1'}
-              min="0.01"
-              value={form.valorAlvo}
-              onChange={(e) => setForm({ ...form, valorAlvo: e.target.value })}
-              required
-            />
+            {form.tipo === TipoMeta.Faturamento ? (
+              <CurrencyInput
+                label="Valor alvo (R$)"
+                value={form.valorAlvo}
+                onChange={(valorAlvo) => setForm({ ...form, valorAlvo })}
+                required
+              />
+            ) : (
+              <Input
+                label="Quantidade alvo"
+                type="number"
+                step="1"
+                min="1"
+                value={form.valorAlvo}
+                onChange={(e) => setForm({ ...form, valorAlvo: e.target.value })}
+                required
+              />
+            )}
             <div className="grid grid-cols-2 gap-4">
               <Input
                 label="Início do período"
@@ -157,7 +166,7 @@ export function MetasPage() {
                 required
               />
             </div>
-            {erro && <p className="text-sm text-red-600">{erro}</p>}
+            {erro && <p className="text-sm text-rose">{erro}</p>}
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="secondary" onClick={() => setModalAberto(false)}>
                 Cancelar

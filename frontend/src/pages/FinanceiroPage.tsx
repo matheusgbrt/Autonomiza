@@ -5,7 +5,7 @@ import { TipoLancamento } from '../api/types';
 import { extractErrorMessage } from '../api/client';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { Input, Select } from '../components/ui/Input';
+import { CurrencyInput, Input, Select } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { Table, Thead, Tbody, Tr, Th, Td } from '../components/ui/Table';
 import { PageHeader } from '../components/PageHeader';
@@ -92,16 +92,16 @@ export function FinanceiroPage() {
       {saldo && (
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Card>
-            <p className="text-xs font-medium uppercase text-slate-500">Entradas do mês</p>
-            <p className="mt-2 text-2xl font-bold text-emerald-600">{formatarMoeda(saldo.totalEntradas)}</p>
+            <p className="text-xs font-medium uppercase text-faint">Entradas do mês</p>
+            <p className="mt-2 text-2xl font-bold text-mint">{formatarMoeda(saldo.totalEntradas)}</p>
           </Card>
           <Card>
-            <p className="text-xs font-medium uppercase text-slate-500">Saídas do mês</p>
-            <p className="mt-2 text-2xl font-bold text-red-600">{formatarMoeda(saldo.totalSaidas)}</p>
+            <p className="text-xs font-medium uppercase text-faint">Saídas do mês</p>
+            <p className="mt-2 text-2xl font-bold text-rose">{formatarMoeda(saldo.totalSaidas)}</p>
           </Card>
           <Card>
-            <p className="text-xs font-medium uppercase text-slate-500">Saldo</p>
-            <p className={`mt-2 text-2xl font-bold ${saldo.saldo >= 0 ? 'text-slate-900' : 'text-red-600'}`}>
+            <p className="text-xs font-medium uppercase text-faint">Saldo</p>
+            <p className={`mt-2 text-2xl font-bold ${saldo.saldo >= 0 ? 'text-ink' : 'text-rose'}`}>
               {formatarMoeda(saldo.saldo)}
             </p>
           </Card>
@@ -110,14 +110,14 @@ export function FinanceiroPage() {
 
       {saldo && saldo.porCategoria.length > 0 && (
         <Card className="mb-8">
-          <p className="mb-3 text-sm font-semibold text-slate-700">Por categoria (mês atual)</p>
+          <p className="mb-3 text-sm font-semibold text-muted">Por categoria (mês atual)</p>
           <div className="space-y-2">
             {saldo.porCategoria.map((c) => (
               <div key={c.categoria} className="flex items-center justify-between text-sm">
-                <span className="text-slate-600">{c.categoria}</span>
-                <span className="text-slate-900">
-                  <span className="text-emerald-600">{formatarMoeda(c.totalEntradas)}</span>
-                  {c.totalSaidas > 0 && <span className="ml-2 text-red-600">-{formatarMoeda(c.totalSaidas)}</span>}
+                <span className="text-muted">{c.categoria}</span>
+                <span className="text-ink">
+                  <span className="text-mint">{formatarMoeda(c.totalEntradas)}</span>
+                  {c.totalSaidas > 0 && <span className="ml-2 text-rose">-{formatarMoeda(c.totalSaidas)}</span>}
                 </span>
               </div>
             ))}
@@ -126,7 +126,7 @@ export function FinanceiroPage() {
       )}
 
       {isLoading ? (
-        <p className="text-sm text-slate-500">Carregando…</p>
+        <p className="text-sm text-faint">Carregando…</p>
       ) : (
         <Table>
           <Thead>
@@ -141,7 +141,7 @@ export function FinanceiroPage() {
           <Tbody>
             {lancamentos?.length === 0 && (
               <Tr>
-                <Td colSpan={5} className="text-center text-slate-400">
+                <Td colSpan={5} className="text-center text-faint">
                   Nenhum lançamento ainda.
                 </Td>
               </Tr>
@@ -154,7 +154,7 @@ export function FinanceiroPage() {
                   </Badge>
                 </Td>
                 <Td>{lancamento.categoria}</Td>
-                <Td className="font-medium text-slate-900">{formatarMoeda(lancamento.valor)}</Td>
+                <Td className="font-medium text-ink">{formatarMoeda(lancamento.valor)}</Td>
                 <Td>{new Date(lancamento.data).toLocaleDateString('pt-BR')}</Td>
                 <Td className="text-right">
                   <Button variant="ghost" onClick={() => remover.mutate(lancamento.id)}>
@@ -185,15 +185,7 @@ export function FinanceiroPage() {
               placeholder="Ex: Serviços, Material, Aluguel…"
               required
             />
-            <Input
-              label="Valor (R$)"
-              type="number"
-              step="0.01"
-              min="0.01"
-              value={form.valor}
-              onChange={(e) => setForm({ ...form, valor: e.target.value })}
-              required
-            />
+            <CurrencyInput label="Valor (R$)" value={form.valor} onChange={(valor) => setForm({ ...form, valor })} required />
             <Input
               label="Data"
               type="date"
@@ -206,7 +198,7 @@ export function FinanceiroPage() {
               value={form.descricao}
               onChange={(e) => setForm({ ...form, descricao: e.target.value })}
             />
-            {erro && <p className="text-sm text-red-600">{erro}</p>}
+            {erro && <p className="text-sm text-rose">{erro}</p>}
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="secondary" onClick={() => setModalAberto(false)}>
                 Cancelar

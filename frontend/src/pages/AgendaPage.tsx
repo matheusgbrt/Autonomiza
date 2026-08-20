@@ -1,5 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Star } from 'lucide-react';
 import * as agendamentosApi from '../api/agendamentos';
 import * as clientesApi from '../api/clientes';
 import * as servicosApi from '../api/servicos';
@@ -81,16 +82,23 @@ export function AgendaPage() {
   });
 
   const mudarStatus = useMutation({
-    mutationFn: ({ agendamento, status }: { agendamento: AgendamentoDto; status: StatusAgendamento }) =>
+    mutationFn: ({ agendamento, status, notaAtendimento }: { agendamento: AgendamentoDto; status: StatusAgendamento; notaAtendimento?: number | null }) =>
       agendamentosApi.atualizarAgendamento(agendamento.id, {
         clienteId: agendamento.clienteId,
         servicoId: agendamento.servicoId,
         dataHoraInicio: agendamento.dataHoraInicio,
         status,
         observacoes: agendamento.observacoes,
+        notaAtendimento: notaAtendimento ?? agendamento.notaAtendimento,
       }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['agendamentos'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agendamentos'] });
+      setAvaliando(null);
+    },
   });
+
+  const [avaliando, setAvaliando] = useState<AgendamentoDto | null>(null);
+  const [notaSelecionada, setNotaSelecionada] = useState(5);
 
   function abrirNovo() {
     setForm(FORM_VAZIO);
@@ -117,8 +125,8 @@ export function AgendaPage() {
           <button
             key={opcao}
             onClick={() => setPeriodo(opcao)}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium capitalize ${
-              periodo === opcao ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 border border-slate-300'
+            className={`cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium capitalize ${
+              periodo === opcao ? 'bg-indigo text-white' : 'bg-elevated text-muted border border-stroke'
             }`}
           >
             {opcao === 'mes' ? 'mês' : opcao}
@@ -127,7 +135,7 @@ export function AgendaPage() {
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-slate-500">Carregando…</p>
+        <p className="text-sm text-faint">Carregando…</p>
       ) : (
         <Table>
           <Thead>
@@ -142,7 +150,7 @@ export function AgendaPage() {
           <Tbody>
             {agendamentos?.length === 0 && (
               <Tr>
-                <Td colSpan={5} className="text-center text-slate-400">
+                <Td colSpan={5} className="text-center text-faint">
                   Nenhum agendamento nesse período.
                 </Td>
               </Tr>
@@ -151,7 +159,7 @@ export function AgendaPage() {
               const status = STATUS_LABEL[agendamento.status];
               return (
                 <Tr key={agendamento.id}>
-                  <Td className="font-medium text-slate-900">{agendamento.clienteNome}</Td>
+                  <Td className="font-medium text-ink">{agendamento.clienteNome}</Td>
                   <Td>{agendamento.servicoNome}</Td>
                   <Td>{new Date(agendamento.dataHoraInicio).toLocaleString('pt-BR')}</Td>
                   <Td>
@@ -167,7 +175,19 @@ export function AgendaPage() {
                           Confirmar
                         </Button>
                       )}
-                      {agendamento.status !== StatusAgendamento.Cancelado && (
+                      {agendamento.status === StatusAgendamento.Confirmado && (
+                        <Button
+                          variant="ghost"
+                          onClick={() => {
+                            setNotaSelecionada(agendamento.notaAtendimento ?? 5);
+                            setAvaliando(agendamento);
+                          }}
+                        >
+                          Concluir
+                        </Button>
+                      )}
+                      {agendamento.status !== StatusAgendamento.Cancelado &&
+                        agendamento.status !== StatusAgendamento.Concluido && (
                         <Button
                           variant="ghost"
                           onClick={() => mudarStatus.mutate({ agendamento, status: StatusAgendamento.Cancelado })}
@@ -226,7 +246,7 @@ export function AgendaPage() {
               onChange={(e) => setForm({ ...form, observacoes: e.target.value })}
               rows={2}
             />
-            {erro && <p className="text-sm text-red-600">{erro}</p>}
+            {erro && <p className="text-sm text-rose">{erro}</p>}
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="secondary" onClick={() => setModalAberto(false)}>
                 Cancelar
@@ -236,6 +256,35 @@ export function AgendaPage() {
               </Button>
             </div>
           </form>
+        </Modal>
+      )}
+
+      {avaliando && (
+        <Modal title="Concluir atendimento" onClose={() => setAvaliando(null)}>
+          <p className="mb-4 text-sm text-muted">
+            {avaliando.clienteNome} · {avaliando.servicoNome}
+          </p>
+          <p className="mb-2 text-sm font-medium text-muted">Avaliação do atendimento (opcional)</p>
+          <div className="mb-6 flex gap-1">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button key={n} type="button" onClick={() => setNotaSelecionada(n)} aria-label={`${n} estrelas`} className="cursor-pointer">
+                <Star size={24} className={n <= notaSelecionada ? 'fill-amber text-amber' : 'text-stroke'} />
+              </button>
+            ))}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="secondary" onClick={() => setAvaliando(null)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() =>
+                mudarStatus.mutate({ agendamento: avaliando, status: StatusAgendamento.Concluido, notaAtendimento: notaSelecionada })
+              }
+              disabled={mudarStatus.isPending}
+            >
+              {mudarStatus.isPending ? 'Salvando…' : 'Concluir'}
+            </Button>
+          </div>
         </Modal>
       )}
     </div>

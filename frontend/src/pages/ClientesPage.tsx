@@ -5,10 +5,11 @@ import * as clientesApi from '../api/clientes';
 import type { ClienteDto } from '../api/types';
 import { extractErrorMessage } from '../api/client';
 import { Button } from '../components/ui/Button';
-import { Input, Textarea } from '../components/ui/Input';
+import { Input, PhoneInput, Textarea } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { Table, Thead, Tbody, Tr, Th, Td } from '../components/ui/Table';
 import { PageHeader } from '../components/PageHeader';
+import { formatarTelefone } from '../utils/mask';
 
 interface FormState {
   nome: string;
@@ -88,7 +89,7 @@ export function ClientesPage() {
       />
 
       {isLoading ? (
-        <p className="text-sm text-slate-500">Carregando…</p>
+        <p className="text-sm text-faint">Carregando…</p>
       ) : (
         <Table>
           <Thead>
@@ -102,20 +103,20 @@ export function ClientesPage() {
           <Tbody>
             {clientes?.length === 0 && (
               <Tr>
-                <Td colSpan={4} className="text-center text-slate-400">
+                <Td colSpan={4} className="text-center text-faint">
                   Nenhum cliente cadastrado ainda.
                 </Td>
               </Tr>
             )}
             {clientes?.map((cliente) => (
               <Tr key={cliente.id}>
-                <Td className="font-medium text-slate-900">
-                  <Link to={`/clientes/${cliente.id}`} className="hover:text-indigo-600">
+                <Td className="font-medium text-ink">
+                  <Link to={`/clientes/${cliente.id}`} className="hover:text-indigo/80">
                     {cliente.nome}
                   </Link>
                 </Td>
                 <Td>{cliente.email ?? '—'}</Td>
-                <Td>{cliente.telefone ?? '—'}</Td>
+                <Td>{cliente.telefone ? formatarTelefone(cliente.telefone) : '—'}</Td>
                 <Td className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button variant="ghost" onClick={() => abrirEdicao(cliente)}>
@@ -142,19 +143,14 @@ export function ClientesPage() {
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
-            <Input
-              label="Telefone"
-              value={form.telefone}
-              onChange={(e) => setForm({ ...form, telefone: e.target.value })}
-              placeholder="Ex: 5511999999999"
-            />
+            <PhoneInput label="Telefone" value={form.telefone} onChange={(telefone) => setForm({ ...form, telefone })} />
             <Textarea
               label="Observações"
               value={form.observacoes}
               onChange={(e) => setForm({ ...form, observacoes: e.target.value })}
               rows={3}
             />
-            {erro && <p className="text-sm text-red-600">{erro}</p>}
+            {erro && <p className="text-sm text-rose">{erro}</p>}
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="secondary" onClick={fecharModal}>
                 Cancelar

@@ -4,7 +4,7 @@ import * as servicosApi from '../api/servicos';
 import type { ServicoDto } from '../api/types';
 import { extractErrorMessage } from '../api/client';
 import { Button } from '../components/ui/Button';
-import { Input, Textarea } from '../components/ui/Input';
+import { CurrencyInput, Input, Textarea } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { Table, Thead, Tbody, Tr, Th, Td } from '../components/ui/Table';
 import { PageHeader } from '../components/PageHeader';
@@ -87,7 +87,7 @@ export function ServicosPage() {
       />
 
       {isLoading ? (
-        <p className="text-sm text-slate-500">Carregando…</p>
+        <p className="text-sm text-faint">Carregando…</p>
       ) : (
         <Table>
           <Thead>
@@ -101,14 +101,14 @@ export function ServicosPage() {
           <Tbody>
             {servicos?.length === 0 && (
               <Tr>
-                <Td colSpan={4} className="text-center text-slate-400">
+                <Td colSpan={4} className="text-center text-faint">
                   Nenhum serviço cadastrado ainda.
                 </Td>
               </Tr>
             )}
             {servicos?.map((servico) => (
               <Tr key={servico.id}>
-                <Td className="font-medium text-slate-900">{servico.nome}</Td>
+                <Td className="font-medium text-ink">{servico.nome}</Td>
                 <Td>{formatarDuracao(servico.duracao)}</Td>
                 <Td>{servico.valorPadrao.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</Td>
                 <Td className="text-right">
@@ -145,17 +145,14 @@ export function ServicosPage() {
                 onChange={(e) => setForm({ ...form, duracao: e.target.value })}
                 required
               />
-              <Input
+              <CurrencyInput
                 label="Valor padrão (R$)"
-                type="number"
-                step="0.01"
-                min="0"
                 value={form.valorPadrao}
-                onChange={(e) => setForm({ ...form, valorPadrao: e.target.value })}
+                onChange={(valorPadrao) => setForm({ ...form, valorPadrao })}
                 required
               />
             </div>
-            {erro && <p className="text-sm text-red-600">{erro}</p>}
+            {erro && <p className="text-sm text-rose">{erro}</p>}
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="secondary" onClick={() => setModalAberto(false)}>
                 Cancelar

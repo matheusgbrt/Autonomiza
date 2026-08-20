@@ -114,28 +114,28 @@ export function TarefasPage() {
       />
 
       {isLoading ? (
-        <p className="text-sm text-slate-500">Carregando…</p>
+        <p className="text-sm text-faint">Carregando…</p>
       ) : tarefas?.length === 0 ? (
-        <p className="text-sm text-slate-400">Nenhuma tarefa cadastrada ainda.</p>
+        <p className="text-sm text-faint">Nenhuma tarefa cadastrada ainda.</p>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {tarefas?.map((tarefa) => (
             <Card key={tarefa.id}>
               <div className="mb-3 flex items-start justify-between gap-2">
-                <label className="flex items-start gap-2">
+                <label className="flex cursor-pointer items-start gap-2">
                   <input
                     type="checkbox"
                     checked={tarefa.concluida}
                     onChange={() => alternarConcluida.mutate(tarefa)}
-                    className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600"
+                    className="mt-1 h-4 w-4 cursor-pointer rounded border-stroke text-indigo"
                   />
                   <span>
-                    <span className={`block font-semibold ${tarefa.concluida ? 'text-slate-400 line-through' : 'text-slate-900'}`}>
+                    <span className={`block font-semibold ${tarefa.concluida ? 'text-faint line-through' : 'text-ink'}`}>
                       {tarefa.titulo}
                     </span>
-                    {tarefa.descricao && <span className="mt-0.5 block text-sm text-slate-500">{tarefa.descricao}</span>}
+                    {tarefa.descricao && <span className="mt-0.5 block text-sm text-faint">{tarefa.descricao}</span>}
                     {tarefa.dataVencimento && (
-                      <span className="mt-0.5 block text-xs text-slate-400">
+                      <span className="mt-0.5 block text-xs text-faint">
                         Vence em {new Date(tarefa.dataVencimento).toLocaleDateString('pt-BR')}
                       </span>
                     )}
@@ -147,23 +147,23 @@ export function TarefasPage() {
               </div>
 
               {tarefa.itens.length > 0 && (
-                <ul className="mb-3 space-y-1.5 border-t border-slate-100 pt-3">
+                <ul className="mb-3 space-y-1.5 border-t border-stroke pt-3">
                   {tarefa.itens.map((item) => (
                     <li key={item.id} className="flex items-center justify-between gap-2 text-sm">
-                      <label className="flex flex-1 items-center gap-2">
+                      <label className="flex flex-1 cursor-pointer items-center gap-2">
                         <input
                           type="checkbox"
                           checked={item.concluido}
                           onChange={() => alternarItem.mutate({ tarefaId: tarefa.id, item })}
-                          className="h-3.5 w-3.5 rounded border-slate-300 text-indigo-600"
+                          className="h-3.5 w-3.5 cursor-pointer rounded border-stroke text-indigo"
                         />
-                        <span className={item.concluido ? 'text-slate-400 line-through' : 'text-slate-700'}>
+                        <span className={item.concluido ? 'text-faint line-through' : 'text-muted'}>
                           {item.descricao}
                         </span>
                       </label>
                       <button
                         onClick={() => removerItem.mutate({ tarefaId: tarefa.id, itemId: item.id })}
-                        className="text-xs text-slate-300 hover:text-red-500"
+                        className="cursor-pointer text-xs text-faint/60 hover:text-rose"
                       >
                         ✕
                       </button>
@@ -184,7 +184,7 @@ export function TarefasPage() {
                   value={novoItemPorTarefa[tarefa.id] ?? ''}
                   onChange={(e) => setNovoItemPorTarefa((atual) => ({ ...atual, [tarefa.id]: e.target.value }))}
                   placeholder="Adicionar item ao checklist…"
-                  className="flex-1 rounded-lg border border-slate-300 px-2 py-1 text-sm focus:border-indigo-500 focus:outline-none"
+                  className="flex-1 rounded-lg border border-stroke px-2 py-1 text-sm focus:border-indigo focus:outline-none"
                 />
                 <Button type="submit" variant="secondary" className="px-3 py-1 text-xs">
                   Adicionar
@@ -213,16 +213,16 @@ export function TarefasPage() {
             />
 
             <div>
-              <span className="mb-1 block text-sm font-medium text-slate-700">Itens do checklist (opcional)</span>
+              <span className="mb-1 block text-sm font-medium text-muted">Itens do checklist (opcional)</span>
               {form.itensIniciais.length > 0 && (
                 <ul className="mb-2 space-y-1">
                   {form.itensIniciais.map((item, i) => (
-                    <li key={i} className="flex items-center justify-between rounded bg-slate-50 px-2 py-1 text-sm">
+                    <li key={i} className="flex items-center justify-between rounded bg-elevated px-2 py-1 text-sm">
                       <span>{item}</span>
                       <button
                         type="button"
                         onClick={() => setForm({ ...form, itensIniciais: form.itensIniciais.filter((_, idx) => idx !== i) })}
-                        className="text-slate-400 hover:text-red-500"
+                        className="cursor-pointer text-faint hover:text-rose"
                       >
                         ✕
                       </button>
@@ -241,7 +241,7 @@ export function TarefasPage() {
                     }
                   }}
                   placeholder="Ex: Ligar ar-condicionado"
-                  className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+                  className="flex-1 rounded-lg border border-stroke px-3 py-2 text-sm focus:border-indigo focus:outline-none"
                 />
                 <Button type="button" variant="secondary" onClick={adicionarItemInicial}>
                   Adicionar
@@ -249,7 +249,7 @@ export function TarefasPage() {
               </div>
             </div>
 
-            {erro && <p className="text-sm text-red-600">{erro}</p>}
+            {erro && <p className="text-sm text-rose">{erro}</p>}
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="secondary" onClick={() => setModalAberto(false)}>
                 Cancelar
