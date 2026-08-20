@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GestaoAutonomo.API/GestaoAutonomo.API.csproj" />
+    <Project Path="src/GestaoAutonomo.Application/GestaoAutonomo.Application.csproj" />
+    <Project Path="src/GestaoAutonomo.Domain/GestaoAutonomo.Domain.csproj" />
+    <Project Path="src/GestaoAutonomo.Infrastructure/GestaoAutonomo.Infrastructure.csproj" />
+  </Folder>
+</Solution>
