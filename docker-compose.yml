@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gestao_autonomo
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ConnectionStrings__Default: Host=postgres;Port=5432;Database=gestao_autonomo;Username=postgres;Password=${POSTGRES_PASSWORD:-postgres}
+      Jwt__Issuer: gestao-autonomo
+      Jwt__Audience: gestao-autonomo-clients
+      Jwt__Key: ${JWT_KEY:?Set JWT_KEY in your .env file to a long random secret}
+      Jwt__ExpiresMinutes: "120"
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
