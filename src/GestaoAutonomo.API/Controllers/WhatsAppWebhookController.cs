@@ -19,13 +19,14 @@ public class WhatsAppWebhookController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> Receber(string instanceId, ZApiWebhookRequest payload, CancellationToken ct)
     {
+        var selecaoId = payload.ButtonsResponseMessage?.ButtonId ?? payload.ListResponseMessage?.SelectedRowId;
         var temTexto = !string.IsNullOrWhiteSpace(payload.Text?.Message);
-        var temBotao = !string.IsNullOrWhiteSpace(payload.ButtonsResponseMessage?.ButtonId);
+        var temSelecao = !string.IsNullOrWhiteSpace(selecaoId);
 
-        if (!string.IsNullOrWhiteSpace(payload.Phone) && (temTexto || temBotao))
+        if (!string.IsNullOrWhiteSpace(payload.Phone) && (temTexto || temSelecao))
         {
             await _webhookProcessor.ProcessarMensagemRecebidaAsync(
-                instanceId, payload.Phone, payload.Text?.Message, payload.ButtonsResponseMessage?.ButtonId, payload.FromMe, ct);
+                instanceId, payload.Phone, payload.Text?.Message, selecaoId, payload.FromMe, ct);
         }
 
         return Ok();

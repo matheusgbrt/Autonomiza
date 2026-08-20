@@ -42,6 +42,31 @@ public class ZApiWhatsAppSender : IWhatsAppSender
             },
             telefoneDestino, ct);
 
+    public Task EnviarListaOpcoesAsync(
+        string instanceId,
+        string token,
+        string? clientToken,
+        string telefoneDestino,
+        string mensagem,
+        string titulo,
+        string botaoLabel,
+        IReadOnlyList<OpcaoWhatsApp> opcoes,
+        CancellationToken ct) =>
+        EnviarAsync(
+            instanceId, token, clientToken, "send-option-list",
+            new
+            {
+                phone = telefoneDestino,
+                message = mensagem,
+                optionList = new
+                {
+                    title = titulo,
+                    buttonLabel = botaoLabel,
+                    options = opcoes.Select(o => new { id = o.Id, title = o.Titulo, description = o.Descricao })
+                }
+            },
+            telefoneDestino, ct);
+
     private async Task EnviarAsync(
         string instanceId,
         string token,
