@@ -9,6 +9,8 @@ public interface IAgendamentoRepository
     Task<bool> ExisteConflitoAsync(Guid usuarioId, DateTime inicio, DateTime fim, Guid? ignorarId, CancellationToken ct);
     Task<Agendamento?> ObterProximoPendenteAsync(Guid usuarioId, Guid clienteId, DateTime agora, CancellationToken ct);
     Task<IReadOnlyList<Agendamento>> ListarPendentesDeLembreteAsync(DateTime janelaInicio, DateTime janelaFim, CancellationToken ct);
+    Task<IReadOnlyList<Agendamento>> ListarPorPeriodoAsync(Guid usuarioId, DateTime inicio, DateTime fimExclusivo, CancellationToken ct);
+    Task<IReadOnlyList<Agendamento>> ListarPorClienteAsync(Guid usuarioId, Guid clienteId, CancellationToken ct);
     Task AdicionarAsync(Agendamento agendamento, CancellationToken ct);
     void Remover(Agendamento agendamento);
     Task SalvarAlteracoesAsync(CancellationToken ct);

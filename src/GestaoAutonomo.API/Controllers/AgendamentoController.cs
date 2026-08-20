@@ -28,9 +28,10 @@ public class AgendamentoController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<AgendamentoDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IReadOnlyList<AgendamentoDto>>> Listar(CancellationToken ct)
+    public async Task<ActionResult<IReadOnlyList<AgendamentoDto>>> Listar(
+        [FromQuery] DateTime? inicio, [FromQuery] DateTime? fim, CancellationToken ct)
     {
-        var agendamentos = await _agendamentoService.ListarAsync(User.GetUsuarioId(), ct);
+        var agendamentos = await _agendamentoService.ListarAsync(User.GetUsuarioId(), inicio, fim, ct);
         return Ok(agendamentos);
     }
 

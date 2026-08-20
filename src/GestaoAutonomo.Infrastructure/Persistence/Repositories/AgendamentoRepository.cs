@@ -51,6 +51,18 @@ public class AgendamentoRepository : IAgendamentoRepository
                 (a.Status == StatusAgendamento.Agendado || a.Status == StatusAgendamento.Confirmado))
             .ToListAsync(ct);
 
+    public async Task<IReadOnlyList<Agendamento>> ListarPorPeriodoAsync(Guid usuarioId, DateTime inicio, DateTime fimExclusivo, CancellationToken ct) =>
+        await _context.Agendamentos
+            .Where(a => a.UsuarioId == usuarioId && a.DataHoraInicio >= inicio && a.DataHoraInicio < fimExclusivo)
+            .OrderBy(a => a.DataHoraInicio)
+            .ToListAsync(ct);
+
+    public async Task<IReadOnlyList<Agendamento>> ListarPorClienteAsync(Guid usuarioId, Guid clienteId, CancellationToken ct) =>
+        await _context.Agendamentos
+            .Where(a => a.UsuarioId == usuarioId && a.ClienteId == clienteId)
+            .OrderByDescending(a => a.DataHoraInicio)
+            .ToListAsync(ct);
+
     public async Task AdicionarAsync(Agendamento agendamento, CancellationToken ct) =>
         await _context.Agendamentos.AddAsync(agendamento, ct);
 

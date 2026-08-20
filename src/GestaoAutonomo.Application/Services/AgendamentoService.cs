@@ -62,9 +62,12 @@ public class AgendamentoService : IAgendamentoService
         return ParaDto(agendamento, cliente?.Nome ?? "—", servico?.Nome ?? "—");
     }
 
-    public async Task<IReadOnlyList<AgendamentoDto>> ListarAsync(Guid usuarioId, CancellationToken ct)
+    public async Task<IReadOnlyList<AgendamentoDto>> ListarAsync(Guid usuarioId, DateTime? inicio, DateTime? fim, CancellationToken ct)
     {
-        var agendamentos = await _agendamentoRepository.ListarAsync(usuarioId, ct);
+        var agendamentos = inicio is not null && fim is not null
+            ? await _agendamentoRepository.ListarPorPeriodoAsync(usuarioId, inicio.Value, fim.Value, ct)
+            : await _agendamentoRepository.ListarAsync(usuarioId, ct);
+
         if (agendamentos.Count == 0) return Array.Empty<AgendamentoDto>();
 
         var clientes = (await _clienteRepository.ListarAsync(usuarioId, ct)).ToDictionary(c => c.Id, c => c.Nome);
@@ -72,6 +75,19 @@ public class AgendamentoService : IAgendamentoService
 
         return agendamentos
             .Select(a => ParaDto(a, clientes.GetValueOrDefault(a.ClienteId, "—"), servicos.GetValueOrDefault(a.ServicoId, "—")))
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<AgendamentoDto>> ListarPorClienteAsync(Guid usuarioId, Guid clienteId, CancellationToken ct)
+    {
+        var agendamentos = await _agendamentoRepository.ListarPorClienteAsync(usuarioId, clienteId, ct);
+        if (agendamentos.Count == 0) return Array.Empty<AgendamentoDto>();
+
+        var cliente = await _clienteRepository.ObterPorIdAsync(usuarioId, clienteId, ct);
+        var servicos = (await _servicoRepository.ListarAsync(usuarioId, ct)).ToDictionary(s => s.Id, s => s.Nome);
+
+        return agendamentos
+            .Select(a => ParaDto(a, cliente?.Nome ?? "—", servicos.GetValueOrDefault(a.ServicoId, "—")))
             .ToList();
     }
 

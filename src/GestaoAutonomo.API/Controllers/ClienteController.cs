@@ -1,5 +1,6 @@
 using FluentValidation;
 using GestaoAutonomo.API.Common;
+using GestaoAutonomo.Application.DTOs.Agendamento;
 using GestaoAutonomo.Application.DTOs.Cliente;
 using GestaoAutonomo.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -13,15 +14,18 @@ namespace GestaoAutonomo.API.Controllers;
 public class ClienteController : ControllerBase
 {
     private readonly IClienteService _clienteService;
+    private readonly IAgendamentoService _agendamentoService;
     private readonly IValidator<CriarClienteDto> _criarValidator;
     private readonly IValidator<AtualizarClienteDto> _atualizarValidator;
 
     public ClienteController(
         IClienteService clienteService,
+        IAgendamentoService agendamentoService,
         IValidator<CriarClienteDto> criarValidator,
         IValidator<AtualizarClienteDto> atualizarValidator)
     {
         _clienteService = clienteService;
+        _agendamentoService = agendamentoService;
         _criarValidator = criarValidator;
         _atualizarValidator = atualizarValidator;
     }
@@ -41,6 +45,19 @@ public class ClienteController : ControllerBase
     {
         var cliente = await _clienteService.ObterPorIdAsync(User.GetUsuarioId(), id, ct);
         return cliente is null ? NotFound() : Ok(cliente);
+    }
+
+    [HttpGet("{id:guid}/agendamentos")]
+    [ProducesResponseType(typeof(IReadOnlyList<AgendamentoDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IReadOnlyList<AgendamentoDto>>> ListarAgendamentos(Guid id, CancellationToken ct)
+    {
+        var usuarioId = User.GetUsuarioId();
+        var cliente = await _clienteService.ObterPorIdAsync(usuarioId, id, ct);
+        if (cliente is null) return NotFound();
+
+        var agendamentos = await _agendamentoService.ListarPorClienteAsync(usuarioId, id, ct);
+        return Ok(agendamentos);
     }
 
     [HttpPost]
