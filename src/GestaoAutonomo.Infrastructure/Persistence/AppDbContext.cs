@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<Meta> Metas => Set<Meta>();
     public DbSet<InsightIA> InsightsIA => Set<InsightIA>();
     public DbSet<RecomendacaoIA> RecomendacoesIA => Set<RecomendacaoIA>();
+    public DbSet<MensagemWhatsApp> MensagensWhatsApp => Set<MensagemWhatsApp>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

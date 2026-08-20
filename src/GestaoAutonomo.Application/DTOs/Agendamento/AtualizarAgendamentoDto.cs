@@ -7,4 +7,5 @@ public record AtualizarAgendamentoDto(
     Guid ServicoId,
     DateTime DataHoraInicio,
     StatusAgendamento Status,
-    string? Observacoes);
+    string? Observacoes,
+    int? NotaAtendimento);

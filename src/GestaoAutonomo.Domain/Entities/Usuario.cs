@@ -13,4 +13,10 @@ public class Usuario : BaseEntity
     public string? ZApiInstanceId { get; set; }
     public string? ZApiToken { get; set; }
     public string? ZApiClientToken { get; set; }
+
+    public bool WhatsAppRespostasAutomaticasAtivas { get; set; } = true;
+    public bool WhatsAppHorariosDisponiveisAtivo { get; set; } = true;
+    public bool WhatsAppConfirmarAgendamentosAtivo { get; set; } = true;
+    public bool WhatsAppLembretesAutomaticosAtivos { get; set; } = true;
+    public string? WhatsAppMensagemBoasVindas { get; set; }
 }

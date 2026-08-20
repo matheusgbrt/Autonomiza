@@ -19,6 +19,11 @@ public class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
         builder.Property(u => u.ZApiInstanceId).HasMaxLength(100);
         builder.Property(u => u.ZApiToken).HasMaxLength(200);
         builder.Property(u => u.ZApiClientToken).HasMaxLength(200);
+        builder.Property(u => u.WhatsAppMensagemBoasVindas).HasMaxLength(1000);
+        builder.Property(u => u.WhatsAppRespostasAutomaticasAtivas).HasDefaultValue(true);
+        builder.Property(u => u.WhatsAppHorariosDisponiveisAtivo).HasDefaultValue(true);
+        builder.Property(u => u.WhatsAppConfirmarAgendamentosAtivo).HasDefaultValue(true);
+        builder.Property(u => u.WhatsAppLembretesAutomaticosAtivos).HasDefaultValue(true);
 
         builder.HasIndex(u => u.Email).IsUnique();
         builder.HasIndex(u => u.ZApiInstanceId).IsUnique().HasFilter("\"ZApiInstanceId\" IS NOT NULL");

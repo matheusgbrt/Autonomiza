@@ -47,6 +47,7 @@ public static class DependencyInjection
         services.AddScoped<IMetaRepository, MetaRepository>();
         services.AddScoped<IInsightRepository, InsightRepository>();
         services.AddScoped<IRecomendacaoRepository, RecomendacaoRepository>();
+        services.AddScoped<IMensagemWhatsAppRepository, MensagemWhatsAppRepository>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 

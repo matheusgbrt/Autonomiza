@@ -29,9 +29,9 @@ public class DashboardController : ControllerBase
     [Authorize(Policy = GestaoAutonomo.Infrastructure.DependencyInjection.PremiumOnlyPolicy)]
     [ProducesResponseType(typeof(DashboardAvancadoDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<DashboardAvancadoDto>> Avancado(CancellationToken ct)
+    public async Task<ActionResult<DashboardAvancadoDto>> Avancado([FromQuery] DateOnly? inicio, [FromQuery] DateOnly? fim, CancellationToken ct)
     {
-        var avancado = await _dashboardService.ObterAvancadoAsync(User.GetUsuarioId(), ct);
+        var avancado = await _dashboardService.ObterAvancadoAsync(User.GetUsuarioId(), inicio, fim, ct);
         return Ok(avancado);
     }
 }

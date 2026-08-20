@@ -12,4 +12,5 @@ public record AgendamentoDto(
     DateTime DataHoraFim,
     StatusAgendamento Status,
     string? Observacoes,
+    int? NotaAtendimento,
     DateTime CreatedAt);

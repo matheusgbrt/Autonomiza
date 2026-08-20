@@ -22,6 +22,7 @@ public class WhatsAppWebhookProcessor : IWhatsAppWebhookProcessor
     private readonly IAgendamentoRepository _agendamentoRepository;
     private readonly IAgendamentoService _agendamentoService;
     private readonly IWhatsAppSender _whatsAppSender;
+    private readonly IMensagemWhatsAppRepository _mensagemRepository;
 
     public WhatsAppWebhookProcessor(
         IUsuarioRepository usuarioRepository,
@@ -29,7 +30,8 @@ public class WhatsAppWebhookProcessor : IWhatsAppWebhookProcessor
         IServicoRepository servicoRepository,
         IAgendamentoRepository agendamentoRepository,
         IAgendamentoService agendamentoService,
-        IWhatsAppSender whatsAppSender)
+        IWhatsAppSender whatsAppSender,
+        IMensagemWhatsAppRepository mensagemRepository)
     {
         _usuarioRepository = usuarioRepository;
         _clienteRepository = clienteRepository;
@@ -37,6 +39,7 @@ public class WhatsAppWebhookProcessor : IWhatsAppWebhookProcessor
         _agendamentoRepository = agendamentoRepository;
         _agendamentoService = agendamentoService;
         _whatsAppSender = whatsAppSender;
+        _mensagemRepository = mensagemRepository;
     }
 
     public async Task ProcessarMensagemRecebidaAsync(
@@ -51,15 +54,26 @@ public class WhatsAppWebhookProcessor : IWhatsAppWebhookProcessor
 
         var usuario = await _usuarioRepository.ObterPorZApiInstanceIdAsync(instanceId, ct);
         if (usuario is null || string.IsNullOrWhiteSpace(usuario.ZApiToken)) return;
+        if (!usuario.WhatsAppRespostasAutomaticasAtivas) return;
 
         var cliente = await EncontrarClientePorTelefoneAsync(usuario.Id, telefoneRemetente, ct);
         if (cliente is null) return;
+
+        var primeiraConversa = !await _mensagemRepository.ExisteConversaAnteriorAsync(usuario.Id, telefoneRemetente, ct);
+
+        await LogarMensagemAsync(usuario.Id, cliente.Id, telefoneRemetente, DirecaoMensagemWhatsApp.Recebida,
+            botaoSelecionadoId ?? mensagemTexto ?? string.Empty, ct);
+
+        if (primeiraConversa && !string.IsNullOrWhiteSpace(usuario.WhatsAppMensagemBoasVindas))
+        {
+            await EnviarELogarTextoAsync(usuario, cliente.Id, telefoneRemetente, usuario.WhatsAppMensagemBoasVindas!, ct);
+        }
 
         var agendamentoPendente = await _agendamentoRepository.ObterProximoPendenteAsync(usuario.Id, cliente.Id, DateTime.UtcNow, ct);
 
         if (agendamentoPendente is not null)
         {
-            await ProcessarConfirmacaoOuCancelamentoAsync(usuario, agendamentoPendente, mensagemTexto, botaoSelecionadoId, telefoneRemetente, ct);
+            await ProcessarConfirmacaoOuCancelamentoAsync(usuario, cliente, agendamentoPendente, mensagemTexto, botaoSelecionadoId, telefoneRemetente, ct);
             return;
         }
 
@@ -67,7 +81,7 @@ public class WhatsAppWebhookProcessor : IWhatsAppWebhookProcessor
     }
 
     private async Task ProcessarConfirmacaoOuCancelamentoAsync(
-        Usuario usuario, Agendamento agendamento, string? mensagemTexto, string? botaoSelecionadoId, string telefoneRemetente, CancellationToken ct)
+        Usuario usuario, Cliente cliente, Agendamento agendamento, string? mensagemTexto, string? botaoSelecionadoId, string telefoneRemetente, CancellationToken ct)
     {
         var comando = InterpretarComando(botaoSelecionadoId, mensagemTexto);
 
@@ -76,8 +90,7 @@ public class WhatsAppWebhookProcessor : IWhatsAppWebhookProcessor
             agendamento.Status = StatusAgendamento.Confirmado;
             await _agendamentoRepository.SalvarAlteracoesAsync(ct);
 
-            await _whatsAppSender.EnviarTextoAsync(
-                usuario.ZApiInstanceId!, usuario.ZApiToken!, usuario.ZApiClientToken, telefoneRemetente,
+            await EnviarELogarTextoAsync(usuario, cliente.Id, telefoneRemetente,
                 $"Agendamento confirmado para {agendamento.DataHoraInicio:dd/MM 'às' HH:mm}. Até breve!", ct);
             return;
         }
@@ -88,14 +101,12 @@ public class WhatsAppWebhookProcessor : IWhatsAppWebhookProcessor
             agendamento.Status = StatusAgendamento.Cancelado;
             await _agendamentoRepository.SalvarAlteracoesAsync(ct);
 
-            await _whatsAppSender.EnviarTextoAsync(
-                usuario.ZApiInstanceId!, usuario.ZApiToken!, usuario.ZApiClientToken, telefoneRemetente,
+            await EnviarELogarTextoAsync(usuario, cliente.Id, telefoneRemetente,
                 $"Seu agendamento de {agendamento.DataHoraInicio:dd/MM 'às' HH:mm} foi cancelado.", ct);
             return;
         }
 
-        await _whatsAppSender.EnviarBotoesAsync(
-            usuario.ZApiInstanceId!, usuario.ZApiToken!, usuario.ZApiClientToken, telefoneRemetente,
+        await EnviarELogarBotoesAsync(usuario, cliente.Id, telefoneRemetente,
             $"Você tem um agendamento em {agendamento.DataHoraInicio:dd/MM 'às' HH:mm}. Confirmar ou cancelar?",
             BotoesAgendamento.ConfirmarCancelar, ct);
     }
@@ -121,17 +132,24 @@ public class WhatsAppWebhookProcessor : IWhatsAppWebhookProcessor
                 var servico = await _servicoRepository.ObterPorIdAsync(usuario.Id, servicoIdEscolhido, ct);
                 if (servico is not null)
                 {
-                    await OfertarHorariosAsync(usuario, servico, telefoneRemetente, ct);
+                    if (!usuario.WhatsAppHorariosDisponiveisAtivo)
+                    {
+                        await EnviarELogarTextoAsync(usuario, cliente.Id, telefoneRemetente,
+                            $"Para agendar \"{servico.Nome}\", entre em contato diretamente com a gente. Agendamento automático está temporariamente indisponível.", ct);
+                        return;
+                    }
+
+                    await OfertarHorariosAsync(usuario, cliente, servico, telefoneRemetente, ct);
                     return;
                 }
             }
         }
 
         // Passo 1: nada reconhecido -> oferece a lista de serviços
-        await OfertarServicosAsync(usuario, telefoneRemetente, ct);
+        await OfertarServicosAsync(usuario, cliente, telefoneRemetente, ct);
     }
 
-    private async Task OfertarServicosAsync(Usuario usuario, string telefoneRemetente, CancellationToken ct)
+    private async Task OfertarServicosAsync(Usuario usuario, Cliente cliente, string telefoneRemetente, CancellationToken ct)
     {
         var servicos = await _servicoRepository.ListarAsync(usuario.Id, ct);
         if (servicos.Count == 0) return;
@@ -140,19 +158,17 @@ public class WhatsAppWebhookProcessor : IWhatsAppWebhookProcessor
             .Select(s => new OpcaoWhatsApp(s.Id.ToString(), s.Nome, $"{s.ValorPadrao:C2} · {s.Duracao:hh\\:mm}"))
             .ToList();
 
-        await _whatsAppSender.EnviarListaOpcoesAsync(
-            usuario.ZApiInstanceId!, usuario.ZApiToken!, usuario.ZApiClientToken, telefoneRemetente,
+        await EnviarELogarListaAsync(usuario, cliente.Id, telefoneRemetente,
             "Qual serviço você gostaria de agendar?", "Serviços disponíveis", "Escolher", opcoes, ct);
     }
 
-    private async Task OfertarHorariosAsync(Usuario usuario, Servico servico, string telefoneRemetente, CancellationToken ct)
+    private async Task OfertarHorariosAsync(Usuario usuario, Cliente cliente, Servico servico, string telefoneRemetente, CancellationToken ct)
     {
         var slots = await GerarSlotsDisponiveisAsync(usuario.Id, servico, ct);
 
         if (slots.Count == 0)
         {
-            await _whatsAppSender.EnviarTextoAsync(
-                usuario.ZApiInstanceId!, usuario.ZApiToken!, usuario.ZApiClientToken, telefoneRemetente,
+            await EnviarELogarTextoAsync(usuario, cliente.Id, telefoneRemetente,
                 "Não encontramos horários livres nos próximos dias. Entre em contato diretamente para agendar.", ct);
             return;
         }
@@ -165,8 +181,7 @@ public class WhatsAppWebhookProcessor : IWhatsAppWebhookProcessor
                 null))
             .ToList();
 
-        await _whatsAppSender.EnviarListaOpcoesAsync(
-            usuario.ZApiInstanceId!, usuario.ZApiToken!, usuario.ZApiClientToken, telefoneRemetente,
+        await EnviarELogarListaAsync(usuario, cliente.Id, telefoneRemetente,
             $"Horários disponíveis para \"{servico.Nome}\":", "Horários", "Escolher", opcoes, ct);
     }
 
@@ -200,23 +215,30 @@ public class WhatsAppWebhookProcessor : IWhatsAppWebhookProcessor
     {
         try
         {
-            var dto = new CriarAgendamentoDto(cliente.Id, servicoId, dataHoraInicio, "Agendado via WhatsApp");
+            var dto = new CriarAgendamentoDto(cliente.Id, servicoId, dataHoraInicio, IntegracaoWhatsAppService.ObservacaoAgendamentoViaWhatsApp);
             var agendamento = await _agendamentoService.CriarAsync(usuario.Id, dto, ct);
 
-            await _whatsAppSender.EnviarTextoAsync(
-                usuario.ZApiInstanceId!, usuario.ZApiToken!, usuario.ZApiClientToken, telefoneRemetente,
+            if (!usuario.WhatsAppConfirmarAgendamentosAtivo)
+            {
+                var entidade = await _agendamentoRepository.ObterPorIdAsync(usuario.Id, agendamento.Id, ct);
+                if (entidade is not null)
+                {
+                    entidade.Status = StatusAgendamento.Confirmado;
+                    await _agendamentoRepository.SalvarAlteracoesAsync(ct);
+                }
+            }
+
+            await EnviarELogarTextoAsync(usuario, cliente.Id, telefoneRemetente,
                 $"Agendado! {agendamento.ServicoNome} em {agendamento.DataHoraInicio:dd/MM 'às' HH:mm}. Até breve!", ct);
         }
         catch (AgendamentoConflitanteException)
         {
-            await _whatsAppSender.EnviarTextoAsync(
-                usuario.ZApiInstanceId!, usuario.ZApiToken!, usuario.ZApiClientToken, telefoneRemetente,
+            await EnviarELogarTextoAsync(usuario, cliente.Id, telefoneRemetente,
                 "Esse horário acabou de ser preenchido. Vamos tentar de novo? Responda qualquer coisa para ver os serviços.", ct);
         }
         catch (RecursoNaoEncontradoException)
         {
-            await _whatsAppSender.EnviarTextoAsync(
-                usuario.ZApiInstanceId!, usuario.ZApiToken!, usuario.ZApiClientToken, telefoneRemetente,
+            await EnviarELogarTextoAsync(usuario, cliente.Id, telefoneRemetente,
                 "Não encontramos esse serviço. Responda qualquer coisa para ver os serviços disponíveis.", ct);
         }
     }
@@ -236,6 +258,40 @@ public class WhatsAppWebhookProcessor : IWhatsAppWebhookProcessor
             var sufixoRemetente = digitosRemetente[^Math.Min(8, digitosRemetente.Length)..];
             return sufixoCliente == sufixoRemetente;
         });
+    }
+
+    private async Task LogarMensagemAsync(Guid usuarioId, Guid? clienteId, string telefone, DirecaoMensagemWhatsApp direcao, string conteudo, CancellationToken ct)
+    {
+        await _mensagemRepository.AdicionarAsync(new MensagemWhatsApp
+        {
+            UsuarioId = usuarioId,
+            ClienteId = clienteId,
+            Telefone = telefone,
+            Direcao = direcao,
+            Conteudo = conteudo,
+        }, ct);
+        await _mensagemRepository.SalvarAlteracoesAsync(ct);
+    }
+
+    private async Task EnviarELogarTextoAsync(Usuario usuario, Guid clienteId, string telefoneDestino, string mensagem, CancellationToken ct)
+    {
+        await _whatsAppSender.EnviarTextoAsync(usuario.ZApiInstanceId!, usuario.ZApiToken!, usuario.ZApiClientToken, telefoneDestino, mensagem, ct);
+        await LogarMensagemAsync(usuario.Id, clienteId, telefoneDestino, DirecaoMensagemWhatsApp.Enviada, mensagem, ct);
+    }
+
+    private async Task EnviarELogarBotoesAsync(
+        Usuario usuario, Guid clienteId, string telefoneDestino, string mensagem, IReadOnlyList<BotaoWhatsApp> botoes, CancellationToken ct)
+    {
+        await _whatsAppSender.EnviarBotoesAsync(usuario.ZApiInstanceId!, usuario.ZApiToken!, usuario.ZApiClientToken, telefoneDestino, mensagem, botoes, ct);
+        await LogarMensagemAsync(usuario.Id, clienteId, telefoneDestino, DirecaoMensagemWhatsApp.Enviada, mensagem, ct);
+    }
+
+    private async Task EnviarELogarListaAsync(
+        Usuario usuario, Guid clienteId, string telefoneDestino, string mensagem, string titulo, string botaoLabel,
+        IReadOnlyList<OpcaoWhatsApp> opcoes, CancellationToken ct)
+    {
+        await _whatsAppSender.EnviarListaOpcoesAsync(usuario.ZApiInstanceId!, usuario.ZApiToken!, usuario.ZApiClientToken, telefoneDestino, mensagem, titulo, botaoLabel, opcoes, ct);
+        await LogarMensagemAsync(usuario.Id, clienteId, telefoneDestino, DirecaoMensagemWhatsApp.Enviada, mensagem, ct);
     }
 
     private static string SomenteDigitos(string valor) => Regex.Replace(valor, "[^0-9]", "");

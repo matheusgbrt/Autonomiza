@@ -37,7 +37,7 @@ public class LembreteAgendamentoService : ILembreteAgendamentoService
         foreach (var agendamento in pendentes)
         {
             var usuario = await _usuarioRepository.ObterPorIdAsync(agendamento.UsuarioId, ct);
-            if (usuario is null || usuario.Plano != Plano.Pro ||
+            if (usuario is null || usuario.Plano != Plano.Pro || !usuario.WhatsAppLembretesAutomaticosAtivos ||
                 string.IsNullOrWhiteSpace(usuario.ZApiInstanceId) || string.IsNullOrWhiteSpace(usuario.ZApiToken))
             {
                 continue;

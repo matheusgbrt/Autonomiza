@@ -114,6 +114,7 @@ public class AgendamentoService : IAgendamentoService
         agendamento.DataHoraFim = dataHoraFim;
         agendamento.Status = dto.Status;
         agendamento.Observacoes = dto.Observacoes;
+        agendamento.NotaAtendimento = dto.NotaAtendimento;
 
         await _agendamentoRepository.SalvarAlteracoesAsync(ct);
 
@@ -139,5 +140,6 @@ public class AgendamentoService : IAgendamentoService
         agendamento.DataHoraFim,
         agendamento.Status,
         agendamento.Observacoes,
+        agendamento.NotaAtendimento,
         agendamento.CreatedAt);
 }
