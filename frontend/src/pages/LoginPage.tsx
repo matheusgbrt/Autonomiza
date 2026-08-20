@@ -5,6 +5,7 @@ import { extractErrorMessage } from '../api/client';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
+import { Logo } from '../components/Logo';
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -34,7 +35,7 @@ export function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <Card className="w-full max-w-sm">
-        <h1 className="mb-1 text-xl font-bold text-slate-900">Autônomo Controle</h1>
+        <Logo size={36} className="mb-4" />
         <p className="mb-6 text-sm text-slate-500">Entre na sua conta</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">

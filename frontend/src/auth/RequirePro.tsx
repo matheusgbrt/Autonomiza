@@ -31,10 +31,10 @@ export function RequirePro({ children }: { children: ReactNode }) {
         Recurso Pro
       </div>
       <h2 className="mb-2 text-xl font-semibold text-slate-900">
-        Esse recurso faz parte do Autônomo Pro IA
+        Esse recurso faz parte do Autonomiza Pro IA
       </h2>
       <p className="mb-6 text-sm text-slate-600">
-        Sua conta está no plano gratuito (Autônomo Controle). Este projeto ainda não tem
+        Sua conta está no plano gratuito (Autonomiza). Este projeto ainda não tem
         cobrança real — use o botão abaixo só para fins de demonstração.
       </p>
       {erro && <p className="mb-4 text-sm text-red-600">{erro}</p>}

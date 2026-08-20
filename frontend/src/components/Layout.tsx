@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { Badge } from './ui/Badge';
+import { Logo } from './Logo';
 
 const FREE_LINKS = [
   { to: '/', label: 'Dashboard', end: true },
@@ -33,8 +34,8 @@ export function Layout({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen bg-slate-50">
       <aside className="flex w-64 flex-shrink-0 flex-col border-r border-slate-200 bg-white">
         <div className="border-b border-slate-200 px-5 py-5">
-          <h1 className="text-lg font-bold text-slate-900">Autônomo Controle</h1>
-          <p className="text-xs text-slate-500">Gestão para o profissional autônomo</p>
+          <Logo size={28} />
+          <p className="mt-1 text-xs text-slate-500">Gestão para o profissional autônomo</p>
         </div>
 
         <nav className="flex-1 space-y-1 px-3 py-4">

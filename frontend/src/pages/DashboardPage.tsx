@@ -20,7 +20,7 @@ export function DashboardPage() {
 
   return (
     <div>
-      <PageHeader title="Dashboard" subtitle="Resumo dos últimos 30 dias (Autônomo Controle)" />
+      <PageHeader title="Dashboard" subtitle="Resumo dos últimos 30 dias (Autonomiza)" />
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
